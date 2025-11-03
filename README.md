@@ -26,7 +26,7 @@ brew install ffmpeg
 ### Basic Usage
 
 ```bash
-go run main.go <room_url>
+go run main.go [--debug] <room_url>
 ```
 
 ### Examples
@@ -34,6 +34,9 @@ go run main.go <room_url>
 ```bash
 # Monitor and record a specific room
 go run main.go https://www.showroom-live.com/r/watashi_idol_0196
+
+# Enable debug mode to see ffmpeg logs
+go run main.go --debug https://www.showroom-live.com/r/watashi_idol_0196
 
 # Another example
 go run main.go https://www.showroom-live.com/r/ss00013
@@ -44,7 +47,18 @@ go run main.go https://www.showroom-live.com/r/ss00013
 ```bash
 go build -o showroom-recorder
 ./showroom-recorder https://www.showroom-live.com/r/watashi_idol_0196
+
+# With debug mode
+./showroom-recorder --debug https://www.showroom-live.com/r/watashi_idol_0196
 ```
+
+### Debug Mode
+
+By default, ffmpeg output is hidden for clean logs. Use `--debug` to see detailed ffmpeg logs including:
+- HLS segment downloads
+- Stream information
+- Download progress
+- Detailed error messages
 
 ## How It Works
 

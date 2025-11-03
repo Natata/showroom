@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -53,14 +54,18 @@ type Recorder struct {
 	ffmpegCmd      *exec.Cmd
 	stopChan       chan struct{}
 	recordingCount int
+	debug          bool
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		log.Fatal("Usage: go run main.go <room_url>")
+	debugFlag := flag.Bool("debug", false, "Enable debug mode (show ffmpeg logs)")
+	flag.Parse()
+
+	if flag.NArg() < 1 {
+		log.Fatal("Usage: go run main.go [--debug] <room_url>")
 	}
 
-	roomURL := os.Args[1]
+	roomURL := flag.Arg(0)
 	roomURLKey, err := extractRoomURLKey(roomURL)
 	if err != nil {
 		log.Fatalf("Failed to parse room URL: %v", err)
@@ -70,6 +75,7 @@ func main() {
 
 	recorder := &Recorder{
 		roomURLKey: roomURLKey,
+		debug:      *debugFlag,
 	}
 
 	// Handle graceful shutdown
@@ -234,8 +240,14 @@ func (r *Recorder) startRecording() {
 		outputPath,
 	)
 
-	r.ffmpegCmd.Stdout = os.Stdout
-	r.ffmpegCmd.Stderr = os.Stderr
+	// Only show ffmpeg output in debug mode
+	if r.debug {
+		r.ffmpegCmd.Stdout = os.Stdout
+		r.ffmpegCmd.Stderr = os.Stderr
+	} else {
+		r.ffmpegCmd.Stdout = io.Discard
+		r.ffmpegCmd.Stderr = io.Discard
+	}
 
 	r.stopChan = make(chan struct{})
 
